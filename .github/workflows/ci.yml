@@ -85,5 +85,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # docker compose config requires a .env file to exist because several
+      # services declare `env_file: .env`. In CI, .env is gitignored, so we
+      # bootstrap a safe copy from the committed template before validating.
+      - name: Create .env from template
+        run: cp .env.example .env
+
       - name: Validate docker-compose syntax
         run: docker compose config -q
