@@ -178,18 +178,76 @@ def render(symbol, demo_mode):
         st.markdown('</div>', unsafe_allow_html=True)
 
     with fr:
-        entity_json = (
-            f'{{\n  "name": "symbol",\n  "description": "Crypto Pair",\n'
-            f'  "value_type": "STRING",\n  "join_keys": ["id"],\n'
-            f'  "labels": {{\n    "tier": "alpha",\n    "market": "CRYPTO"\n  }}\n}}'
-        )
+        # Build live feature snapshot rows
+        FEATURE_LABELS = {
+            "avg_price_5m":   ("Avg Price (5m)",   "$"),
+            "momentum_1m":    ("Momentum (1m)",    ""),
+            "vwap_10m":       ("VWAP (10m)",       "$"),
+            "volatility_10m": ("Volatility (10m)", ""),
+            "trade_count_5m": ("Trade Count (5m)", ""),
+            "current_price":  ("Current Price",    "$"),
+        }
+
+        rows_html = ""
+        if live_f and isinstance(live_f, dict) and any(live_f.get(k) for k in FEATURE_LABELS):
+            for key, (label, prefix) in FEATURE_LABELS.items():
+                raw = live_f.get(key)
+                if raw is None:
+                    value_str = "—"
+                    val_color = "#6e7681"
+                else:
+                    try:
+                        fval = float(raw)
+                        if key == "trade_count_5m":
+                            value_str = f"{int(fval):,}"
+                        elif abs(fval) >= 1000:
+                            value_str = f"{prefix}{fval:,.2f}"
+                        else:
+                            value_str = f"{prefix}{fval:.6f}"
+                        val_color = "#3fb950" if fval >= 0 or prefix == "$" else "#f85149"
+                    except Exception:
+                        value_str = str(raw)
+                        val_color = "#e6edf3"
+
+                rows_html += (
+                    f'<div style="display:flex;justify-content:space-between;align-items:center;'
+                    f'padding:7px 0;border-bottom:1px solid #21262d;">'
+                    f'<span style="font-size:.72rem;color:#8b949e;font-family:JetBrains Mono,monospace">{label}</span>'
+                    f'<span style="font-size:.78rem;font-weight:700;color:{val_color};'
+                    f'font-family:JetBrains Mono,monospace">{value_str}</span>'
+                    f'</div>'
+                )
+        else:
+            rows_html = (
+                '<div style="text-align:center;padding:24px 0;color:#6e7681;font-size:.78rem">'
+                '⚡ Waiting for live data…<br>'
+                '<span style="font-size:.68rem">Start the pipeline or enable Demo Mode</span>'
+                '</div>'
+            )
+
+        freshness_badge = ""
+        if age is not None:
+            chip_str, chip_ok = _freshness_chip(age)
+            bc = "#3fb950" if chip_ok else "#e3b341"
+            freshness_badge = (
+                f'<span style="font-size:.65rem;padding:2px 8px;border-radius:4px;'
+                f'background:rgba(63,185,80,.12);color:{bc};font-family:JetBrains Mono,monospace">'
+                f'FRESH {chip_str}</span>'
+            )
+
         st.markdown(
             '<div class="card">'
-            '<div class="lbl">ENTITY: SYMBOL</div>'
-            f'<pre style="background:#0d1117;border:1px solid #21262d;border-radius:6px;'
-            f'padding:12px;font-family:JetBrains Mono,monospace;font-size:.7rem;'
-            f'color:#6e7681;line-height:1.6;margin:0;overflow:auto">{entity_json}</pre>'
-            '</div>', unsafe_allow_html=True)
+            f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'
+            f'<span class="lbl" style="margin:0">LIVE FEATURE SNAPSHOT</span>'
+            f'{freshness_badge}'
+            f'</div>'
+            f'<div style="font-size:.67rem;color:#6e7681;margin-bottom:10px">'
+            f'Symbol: <span style="color:#58a6ff;font-weight:700">{symbol}</span> &nbsp;·&nbsp; Source: Redis Online Store'
+            f'</div>'
+            f'{rows_html}'
+            '</div>',
+            unsafe_allow_html=True,
+        )
 
         st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
 
