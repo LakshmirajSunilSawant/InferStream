@@ -1,5 +1,5 @@
 """
-StreamML — Unit Tests: Feature Computation
+InferStream — Unit Tests: Feature Computation
 
 Covers:
   - TickWindow sliding window logic

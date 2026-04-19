@@ -1,4 +1,4 @@
-# StreamML — Design System: "Neon Midnight Ops"
+# InferStream — Design System: "Neon Midnight Ops"
 
 > **Source:** Stitch Project — *Live Operations Command Center*
 > **Project ID:** `7044849643172022974`
@@ -419,7 +419,7 @@ border: 1px solid rgba(69, 72, 79, 0.2); /* outline-variant at 20% */
 |---|---|---|---|
 | **Live Operations Command Center** | `fe9232c1af384e6b87195932b387782e` | 2560 × 2240 | Desktop |
 | **Model Registry & Control** | `eee744a948b94f8f9a906c5326e2d318` | 2560 × 2048 | Desktop |
-| **StreamML Operations Center** | `811f2e56943140ec99cb357293021951` | 1280 × 1024 | Desktop |
+| **InferStream Operations Center** | `811f2e56943140ec99cb357293021951` | 1280 × 1024 | Desktop |
 | **Drift & Pipeline Observability** | `0bb807df1f184ba7aaef6ba717330b6d` | 2560 × 2806 | Desktop |
 | **Feature Intelligence Hub** | `c53a46de4a7f4a75a8d2cfe219c21b6e` | 2560 × 2178 | Desktop |
 | **README.md** | `2037492003854883160` | — | Document |
@@ -520,7 +520,7 @@ Copy this block into your root stylesheet to use the design tokens as CSS variab
 |---|---|
 | **Use Intentional Asymmetry** | Align high-level metrics left, granular controls right — create a visual "flow" of data |
 | **Embrace Density** | Use Spacing Scale `2` and `3` for tight data grids |
-| **Integrate the Bolt** | The StreamML bolt logo is a functional element — use as Home/Refresh trigger in top-left nav |
+| **Integrate the Bolt** | The InferStream bolt logo is a functional element — use as Home/Refresh trigger in top-left nav |
 | **Use Tonal Layering** | Convey depth through `surface-container` tiers, not box shadows |
 | **Apply Signature Glows** | All primary CTAs should glow with `primary` at 20% opacity |
 

@@ -1,1 +1,1 @@
-"""StreamML — Shared constants and configuration."""
+"""InferStream — Shared constants and configuration."""

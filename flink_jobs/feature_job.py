@@ -1,5 +1,5 @@
 """
-StreamML — PyFlink Feature Computation Job
+InferStream — PyFlink Feature Computation Job
 Consumes raw stock ticks from Kafka, computes windowed features,
 and writes to Redis (online store) and DuckDB (offline store).
 
@@ -39,7 +39,7 @@ logger = logging.getLogger(__name__)
 KAFKA_BOOTSTRAP = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
 TOPIC           = os.getenv("KAFKA_TOPIC_RAW_EVENTS",  "raw-events")
 REDIS_URL       = os.getenv("REDIS_URL",               "redis://localhost:6379")
-DUCKDB_PATH     = os.getenv("DUCKDB_PATH",             "/data/streamml.duckdb")
+DUCKDB_PATH     = os.getenv("DUCKDB_PATH",             "/data/inferstream.duckdb")
 
 WINDOW_5M_SEC  = 300    # 5 minutes
 WINDOW_1M_SEC  = 60     # 1 minute
@@ -222,7 +222,7 @@ def flush_to_duckdb(
 # ── Main Feature Job ──────────────────────────────────────────────────────────
 def run_flink_job():
     """Main feature computation loop (PyFlink-style stateful stream)."""
-    logger.info("🔥 StreamML Flink Feature Job starting")
+    logger.info("🔥 InferStream Flink Feature Job starting")
 
     # Connect Redis with retry — raise immediately if exhausted
     redis_client = connect_redis(max_retries=10)

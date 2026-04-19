@@ -1,5 +1,5 @@
 """
-StreamML — Integration Tests: FastAPI Gateway
+InferStream — Integration Tests: FastAPI Gateway
 
 Uses TestClient (no real services needed — mocks Redis, MLflow, BentoML, DuckDB).
 
@@ -220,7 +220,7 @@ class TestMetricsEndpoint:
 
     def test_metrics_is_prometheus_format(self, client):
         resp = client.get("/metrics")
-        assert "streamml" in resp.text or "python" in resp.text
+        assert "inferstream" in resp.text or "python" in resp.text
 
 
 # ── Rate limiting ─────────────────────────────────────────────────────────────

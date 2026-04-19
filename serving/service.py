@@ -1,5 +1,5 @@
 """
-StreamML — BentoML Model Server
+InferStream — BentoML Model Server
 Loads the Production LightGBM model from MLflow,
 fetches real-time features from Redis (Feast online store),
 and serves predictions via REST.
@@ -84,12 +84,12 @@ def _connect_redis() -> redis.Redis:
 
 # ── BentoML Service ───────────────────────────────────────────────────────────
 @bentoml.service(
-    name    = "streamml_predictor",
+    name    = "inferstream_predictor",
     traffic = {"timeout": 5},
     workers = 2,
 )
 class StockPredictionService:
-    """StreamML real-time crypto direction prediction service."""
+    """InferStream real-time crypto direction prediction service."""
 
     def __init__(self):
         # Load model and Redis connection during BentoML lifecycle init

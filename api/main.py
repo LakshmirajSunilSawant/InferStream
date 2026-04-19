@@ -1,5 +1,5 @@
 """
-StreamML — FastAPI Gateway
+InferStream — FastAPI Gateway
 Public-facing API with 6 endpoints:
   POST /predict              — real-time ML prediction
   GET  /features/{symbol}   — live feature values from Redis
@@ -49,10 +49,10 @@ logger = logging.getLogger(__name__)
 REDIS_URL   = os.getenv("REDIS_URL",             "redis://localhost:6379")
 MLFLOW_URI  = os.getenv("MLFLOW_TRACKING_URI",   "http://localhost:5000")
 BENTOML_URL = os.getenv("BENTOML_URL",           "http://bentoml:3000")
-DUCKDB_PATH = os.getenv("DUCKDB_PATH",           "/data/streamml.duckdb")
+DUCKDB_PATH = os.getenv("DUCKDB_PATH",           "/data/inferstream.duckdb")
 MODEL_NAME  = os.getenv("MODEL_NAME",            "stock_predictor")
 RATE_LIMIT  = os.getenv("API_RATE_LIMIT",        "200/minute")
-DRIFT_REPORT_PATH = os.getenv("DRIFT_REPORT_PATH", "/tmp/streamml_drift_report.json")
+DRIFT_REPORT_PATH = os.getenv("DRIFT_REPORT_PATH", "/tmp/inferstream_drift_report.json")
 
 FEATURE_COLS = [
     "avg_price_5m", "momentum_1m", "vwap_10m",
@@ -67,11 +67,11 @@ LOG_FLUSH_INTERVAL = 5.0   # seconds
 LOG_FLUSH_BATCH    = 50    # flush after N records even if timer hasn't fired
 
 # ── Prometheus Metrics ────────────────────────────────────────────────────────
-PREDICTION_COUNTER = Counter("streamml_predictions_total",         "Total predictions",       ["symbol", "prediction"])
-PREDICTION_LATENCY = Histogram("streamml_prediction_latency_seconds", "Prediction latency",  buckets=[.005,.01,.025,.05,.1,.25,.5,1,2.5])
-FEATURE_FRESHNESS  = Gauge("streamml_feature_freshness_seconds",   "Seconds since last feature update", ["symbol"])
-DRIFT_SCORE_GAUGE  = Gauge("streamml_drift_score",                 "Latest drift score")
-REQUEST_COUNTER    = Counter("streamml_http_requests_total",        "Total HTTP requests",     ["method", "path", "status"])
+PREDICTION_COUNTER = Counter("inferstream_predictions_total",         "Total predictions",       ["symbol", "prediction"])
+PREDICTION_LATENCY = Histogram("inferstream_prediction_latency_seconds", "Prediction latency",  buckets=[.005,.01,.025,.05,.1,.25,.5,1,2.5])
+FEATURE_FRESHNESS  = Gauge("inferstream_feature_freshness_seconds",   "Seconds since last feature update", ["symbol"])
+DRIFT_SCORE_GAUGE  = Gauge("inferstream_drift_score",                 "Latest drift score")
+REQUEST_COUNTER    = Counter("inferstream_http_requests_total",        "Total HTTP requests",     ["method", "path", "status"])
 
 
 # ── Background log flusher ────────────────────────────────────────────────────
@@ -139,7 +139,7 @@ async def lifespan(app: FastAPI):
     # Start background flusher
     flusher = asyncio.create_task(_log_flusher(app))
 
-    logger.info("✅ StreamML FastAPI Gateway started")
+    logger.info("✅ InferStream FastAPI Gateway started")
     yield
 
     # Graceful shutdown
@@ -147,7 +147,7 @@ async def lifespan(app: FastAPI):
     await app.state.http_client.aclose()
     await app.state.redis.aclose()
     app.state.duckdb.close()
-    logger.info("👋 StreamML FastAPI Gateway shut down")
+    logger.info("👋 InferStream FastAPI Gateway shut down")
 
 
 # ── Rate Limiter ──────────────────────────────────────────────────────────────
@@ -155,9 +155,9 @@ limiter = Limiter(key_func=get_remote_address, default_limits=[RATE_LIMIT])
 
 # ── FastAPI App ───────────────────────────────────────────────────────────────
 app = FastAPI(
-    title="StreamML API",
+    title="InferStream API",
     description=(
-        "🚀 **StreamML** — Real-Time ML Feature Store & Model Serving Pipeline\n\n"
+        "🚀 **InferStream** — Real-Time ML Feature Store & Model Serving Pipeline\n\n"
         "Production-grade MLOps API with Kafka → Flink → Feast → LightGBM → BentoML.\n\n"
         "Built by Lakshmiraj S. Sawant"
     ),
@@ -451,7 +451,7 @@ async def metrics():
 @app.get("/", include_in_schema=False)
 async def root():
     return {
-        "service": "StreamML API Gateway",
+        "service": "InferStream API Gateway",
         "version": "1.0.1",
         "docs": "/docs",
         "health": "/health",

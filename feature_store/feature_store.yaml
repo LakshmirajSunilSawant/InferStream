@@ -1,4 +1,4 @@
-project: streamml
+project: inferstream
 
 provider:
   registry:
@@ -11,6 +11,6 @@ online_store:
 
 offline_store:
   type: duckdb
-  database: "/data/streamml.duckdb"
+  database: "/data/inferstream.duckdb"
 
 entity_key_serialization_version: 2

@@ -215,7 +215,7 @@ def render(symbol, demo_mode):
     _tick = st.session_state.get("tick", 0)
     st.markdown(
         f'<div class="footer-bar">'
-        f'<span>BUILD v1.0.1-prod · STREAMML INFERSTREAM</span>'
+        f'<span>BUILD v1.0.1-prod · INFERSTREAM INFERSTREAM</span>'
         f'<span>RUNTIME: PYTHON 3.11 · FASTAPI / UVICORN</span>'
         f'<span>REGION: LOCAL · SYS-882 · TICK #{_tick:,}</span>'
         f'<span>{_ts}</span>'

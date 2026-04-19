@@ -1,5 +1,5 @@
 """
-StreamML — Airflow DAG: Drift Detection Pipeline
+InferStream — Airflow DAG: Drift Detection Pipeline
 Runs every hour to check model drift using Evidently AI.
 Sends alerts if drift score exceeds threshold.
 """
@@ -8,20 +8,20 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 
 default_args = {
-    "owner":            "streamml",
+    "owner":            "inferstream",
     "retries":          1,
     "retry_delay":      timedelta(minutes=2),
     "email_on_failure": False,
 }
 
 with DAG(
-    dag_id="streamml_drift_detection",
+    dag_id="inferstream_drift_detection",
     default_args=default_args,
     description="Hourly model drift detection using Evidently AI",
     schedule_interval="0 * * * *",   # every hour
     start_date=datetime(2026, 3, 1),
     catchup=False,
-    tags=["streamml", "monitoring", "evidently"],
+    tags=["inferstream", "monitoring", "evidently"],
 ) as dag:
 
     def run_drift_monitor():
@@ -43,7 +43,7 @@ with DAG(
             score = float(os.environ.get("LAST_DRIFT_SCORE", "0"))
             requests.post(
                 "http://prometheus:9091/metrics/job/drift_monitor",
-                data=f"streamml_drift_score {score}\n",
+                data=f"inferstream_drift_score {score}\n",
                 timeout=5,
             )
         except Exception:

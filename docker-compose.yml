@@ -1,4 +1,4 @@
-name: streamml
+name: inferstream
 
 # Removed deprecated: version: "3.9"
 
@@ -12,7 +12,7 @@ volumes:
   grafana-data:
 
 networks:
-  streamml-net:
+  inferstream-net:
     driver: bridge
 
 services:
@@ -21,9 +21,9 @@ services:
   # ───────────────────────────────────────────────
   kafka:
     image: confluentinc/cp-kafka:7.6.0
-    container_name: streamml-kafka
+    container_name: inferstream-kafka
     hostname: kafka
-    networks: [streamml-net]
+    networks: [inferstream-net]
     ports:
       - "9092:9092"
       - "9093:9093"
@@ -58,12 +58,12 @@ services:
   # Kafka UI
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
-    container_name: streamml-kafka-ui
-    networks: [streamml-net]
+    container_name: inferstream-kafka-ui
+    networks: [inferstream-net]
     ports:
       - "9080:8080"
     environment:
-      KAFKA_CLUSTERS_0_NAME: streamml
+      KAFKA_CLUSTERS_0_NAME: inferstream
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
     depends_on:
       kafka:
@@ -80,9 +80,9 @@ services:
   # ───────────────────────────────────────────────
   redis:
     image: redis/redis-stack:latest
-    container_name: streamml-redis
+    container_name: inferstream-redis
     hostname: redis
-    networks: [streamml-net]
+    networks: [inferstream-net]
     ports:
       - "6379:6379"
       - "8001:8001"   # RedisInsight
@@ -105,9 +105,9 @@ services:
   # ───────────────────────────────────────────────
   mlflow:
     image: ghcr.io/mlflow/mlflow:v2.11.1
-    container_name: streamml-mlflow
+    container_name: inferstream-mlflow
     hostname: mlflow
-    networks: [streamml-net]
+    networks: [inferstream-net]
     ports:
       - "5000:5000"
     environment:
@@ -139,9 +139,9 @@ services:
   # ───────────────────────────────────────────────
   airflow:
     image: apache/airflow:2.9.1
-    container_name: streamml-airflow
+    container_name: inferstream-airflow
     hostname: airflow
-    networks: [streamml-net]
+    networks: [inferstream-net]
     ports:
       - "8080:8080"
     env_file: .env
@@ -151,7 +151,7 @@ services:
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: "sqlite:////opt/airflow/airflow.db"
       MLFLOW_TRACKING_URI: http://mlflow:5000
       REDIS_URL: redis://redis:6379
-      DUCKDB_PATH: /data/streamml.duckdb
+      DUCKDB_PATH: /data/inferstream.duckdb
     volumes:
       - ./dags:/opt/airflow/dags
       - ./training:/opt/airflow/training
@@ -163,7 +163,7 @@ services:
       bash -c "
         pip install lightgbm mlflow feast redis duckdb evidently pandas scikit-learn &&
         airflow db migrate &&
-        airflow users create --username admin --password streamml123 --firstname Stream --lastname ML --role Admin --email admin@streamml.io &&
+        airflow users create --username admin --password inferstream123 --firstname Stream --lastname ML --role Admin --email admin@inferstream.io &&
         airflow webserver --port 8080 &
         airflow scheduler
       "
@@ -187,9 +187,9 @@ services:
   # ───────────────────────────────────────────────
   prometheus:
     image: prom/prometheus:v2.51.0
-    container_name: streamml-prometheus
+    container_name: inferstream-prometheus
     hostname: prometheus
-    networks: [streamml-net]
+    networks: [inferstream-net]
     ports:
       - "9090:9090"
     volumes:
@@ -217,14 +217,14 @@ services:
   # ───────────────────────────────────────────────
   grafana:
     image: grafana/grafana:10.3.3
-    container_name: streamml-grafana
+    container_name: inferstream-grafana
     hostname: grafana
-    networks: [streamml-net]
+    networks: [inferstream-net]
     ports:
       - "3001:3000"
     environment:
       GF_SECURITY_ADMIN_USER: admin
-      GF_SECURITY_ADMIN_PASSWORD: streamml123
+      GF_SECURITY_ADMIN_PASSWORD: inferstream123
       GF_PATHS_PROVISIONING: /etc/grafana/provisioning
     volumes:
       - grafana-data:/var/lib/grafana
@@ -246,19 +246,19 @@ services:
 
   # ───────────────────────────────────────────────
   # Feature Consumer (Kafka → Redis + DuckDB)
-  # FIX: DUCKDB_PATH now matches /data/streamml.duckdb (same as API)
+  # FIX: DUCKDB_PATH now matches /data/inferstream.duckdb (same as API)
   # ───────────────────────────────────────────────
   feature-consumer:
     build:
       context: ./flink_jobs
       dockerfile: Dockerfile
-    container_name: streamml-feature-consumer
-    networks: [streamml-net]
+    container_name: inferstream-feature-consumer
+    networks: [inferstream-net]
     env_file: .env
     environment:
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       REDIS_URL: redis://redis:6379
-      DUCKDB_PATH: /data/streamml.duckdb      # FIX: was /data/features.duckdb
+      DUCKDB_PATH: /data/inferstream.duckdb      # FIX: was /data/features.duckdb
       DUCKDB_BATCH_SIZE: "100"
       DUCKDB_FLUSH_INTERVAL: "10.0"
       FEATURE_COMPUTE_INTERVAL: "0.5"
@@ -283,8 +283,8 @@ services:
     build:
       context: ./producer
       dockerfile: Dockerfile
-    container_name: streamml-producer
-    networks: [streamml-net]
+    container_name: inferstream-producer
+    networks: [inferstream-net]
     env_file: .env
     environment:
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
@@ -306,8 +306,8 @@ services:
     build:
       context: ./api
       dockerfile: Dockerfile
-    container_name: streamml-api
-    networks: [streamml-net]
+    container_name: inferstream-api
+    networks: [inferstream-net]
     ports:
       - "8000:8000"
     env_file: .env
@@ -315,8 +315,8 @@ services:
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       REDIS_URL: redis://redis:6379
       MLFLOW_TRACKING_URI: http://mlflow:5000
-      DUCKDB_PATH: /data/streamml.duckdb
-      DRIFT_REPORT_PATH: /tmp/streamml_drift_report.json
+      DUCKDB_PATH: /data/inferstream.duckdb
+      DRIFT_REPORT_PATH: /tmp/inferstream_drift_report.json
     volumes:
       - duckdb-data:/data
       - ./feature_store:/app/feature_store
@@ -346,8 +346,8 @@ services:
     build:
       context: ./serving
       dockerfile: Dockerfile
-    container_name: streamml-bentoml
-    networks: [streamml-net]
+    container_name: inferstream-bentoml
+    networks: [inferstream-net]
     ports:
       - "3000:3000"
     env_file: .env
@@ -375,8 +375,8 @@ services:
     build:
       context: ./dashboard
       dockerfile: Dockerfile
-    container_name: streamml-dashboard
-    networks: [streamml-net]
+    container_name: inferstream-dashboard
+    networks: [inferstream-net]
     ports:
       - "8501:8501"
     env_file: .env

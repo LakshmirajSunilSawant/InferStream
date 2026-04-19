@@ -3,8 +3,8 @@ global:
   evaluation_interval: 15s
 
 scrape_configs:
-  # StreamML FastAPI Gateway — exposes /metrics (Prometheus client)
-  - job_name: "streamml_api"
+  # InferStream FastAPI Gateway — exposes /metrics (Prometheus client)
+  - job_name: "inferstream_api"
     static_configs:
       - targets: ["api:8000"]
     metrics_path: /metrics

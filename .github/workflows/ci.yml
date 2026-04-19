@@ -1,4 +1,4 @@
-name: StreamML CI/CD
+name: InferStream CI/CD
 
 on:
   push:
@@ -71,7 +71,7 @@ jobs:
         with:
           context: ./${{ matrix.service }}
           push: false
-          tags: streamml/${{ matrix.service }}:${{ github.sha }}
+          tags: inferstream/${{ matrix.service }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 

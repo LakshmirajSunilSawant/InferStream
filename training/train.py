@@ -1,5 +1,5 @@
 """
-StreamML — LightGBM Model Training Script
+InferStream — LightGBM Model Training Script
 Fetches historical features from DuckDB, trains model,
 logs everything to MLflow, and promotes ONLY if new model
 outperforms the current Production champion (AUC comparison).
@@ -32,9 +32,9 @@ logger = logging.getLogger(__name__)
 
 # ── Config ───────────────────────────────────────────────────────────────────
 MLFLOW_URI  = os.getenv("MLFLOW_TRACKING_URI",   "http://localhost:5000")
-EXPERIMENT  = os.getenv("MLFLOW_EXPERIMENT_NAME", "streamml-stock-prediction")
+EXPERIMENT  = os.getenv("MLFLOW_EXPERIMENT_NAME", "inferstream-stock-prediction")
 MODEL_NAME  = os.getenv("MODEL_NAME",             "stock_predictor")
-DUCKDB_PATH = os.getenv("DUCKDB_PATH",            "/data/streamml.duckdb")
+DUCKDB_PATH = os.getenv("DUCKDB_PATH",            "/data/inferstream.duckdb")
 
 # Minimum AUC improvement required to promote the new model over the champion.
 # Set to 0.0 to always promote if new model ties or beats champion.

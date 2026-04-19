@@ -1,5 +1,5 @@
 """
-StreamML — Airflow DAG: Model Training Pipeline
+InferStream — Airflow DAG: Model Training Pipeline
 Runs nightly to retrain LightGBM on freshest features from DuckDB.
 """
 from datetime import datetime, timedelta
@@ -8,20 +8,20 @@ from airflow.operators.python import PythonOperator
 from airflow.operators.bash import BashOperator
 
 default_args = {
-    "owner":            "streamml",
+    "owner":            "inferstream",
     "retries":          2,
     "retry_delay":      timedelta(minutes=5),
     "email_on_failure": False,
 }
 
 with DAG(
-    dag_id="streamml_training_pipeline",
+    dag_id="inferstream_training_pipeline",
     default_args=default_args,
     description="Nightly LightGBM retraining from DuckDB features",
     schedule_interval="0 2 * * *",   # 2 AM daily
     start_date=datetime(2026, 3, 1),
     catchup=False,
-    tags=["streamml", "training", "mlflow"],
+    tags=["inferstream", "training", "mlflow"],
 ) as dag:
 
     def run_training():

@@ -1,5 +1,5 @@
 """
-StreamML — Evidently AI Drift Monitor
+InferStream — Evidently AI Drift Monitor
 Compares recent model predictions vs baseline to detect distribution drift.
 Generates PSI, KS test, and feature importance shift reports.
 
@@ -31,11 +31,11 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # ── Config ───────────────────────────────────────────────────────────────────
-DUCKDB_PATH      = os.getenv("DUCKDB_PATH",           "/data/streamml.duckdb")
+DUCKDB_PATH      = os.getenv("DUCKDB_PATH",           "/data/inferstream.duckdb")
 DRIFT_THRESHOLD  = float(os.getenv("DRIFT_THRESHOLD", "0.2"))
 # Configurable paths (not hardcoded /tmp) — docker-compose can set these
-REPORT_PATH      = os.getenv("DRIFT_REPORT_PATH",      "/tmp/streamml_drift_report.json")
-HTML_REPORT_PATH = os.getenv("DRIFT_HTML_REPORT_PATH", "/tmp/streamml_drift_report.html")
+REPORT_PATH      = os.getenv("DRIFT_REPORT_PATH",      "/tmp/inferstream_drift_report.json")
+HTML_REPORT_PATH = os.getenv("DRIFT_HTML_REPORT_PATH", "/tmp/inferstream_drift_report.html")
 
 FEATURE_COLS = [
     "avg_price_5m",

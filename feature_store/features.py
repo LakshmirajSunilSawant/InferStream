@@ -1,5 +1,5 @@
 """
-StreamML — Feast Feature Definitions
+InferStream — Feast Feature Definitions
 Defines entities, feature views, and feature services for
 online (Redis) and offline (DuckDB) retrieval.
 Prevents training/serving skew by using the same feature logic everywhere.

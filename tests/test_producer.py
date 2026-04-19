@@ -1,5 +1,5 @@
 """
-StreamML — Unit Tests: Binance Live Producer
+InferStream — Unit Tests: Binance Live Producer
 
 Covers:
   - StockTick serialization

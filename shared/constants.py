@@ -1,5 +1,5 @@
 """
-StreamML — Shared Constants
+InferStream — Shared Constants
 Single source of truth for all shared constants across the pipeline.
 Import from here to prevent drift between services.
 """

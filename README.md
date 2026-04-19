@@ -1,4 +1,4 @@
-# ⚡ StreamML — Real-Time ML Feature Store & Model Serving Pipeline
+# ⚡ InferStream — Real-Time ML Feature Store & Model Serving Pipeline
 
 <div align="center">
 
@@ -20,11 +20,11 @@
 
 ---
 
-## 🎯 What Is StreamML?
+## 🎯 What Is InferStream?
 
-Most ML demos train a model and call it done. **StreamML** builds the infrastructure layer that real production systems need:
+Most ML demos train a model and call it done. **InferStream** builds the infrastructure layer that real production systems need:
 
-| Problem | StreamML Solution |
+| Problem | InferStream Solution |
 |---|---|
 | Real-time data ingestion | Apache Kafka (KRaft, no ZooKeeper) |
 | Online feature computation | PyFlink sliding windows (VWAP, momentum, volatility) |
@@ -110,8 +110,8 @@ Most ML demos train a model and call it done. **StreamML** builds the infrastruc
 ### 1. Clone & Start
 
 ```bash
-git clone https://github.com/yourusername/streamml.git
-cd streamml
+git clone https://github.com/yourusername/inferstream.git
+cd inferstream
 
 # Copy and review environment config
 cp .env .env.local
@@ -163,8 +163,8 @@ curl -X POST http://localhost:8000/predict \
 | 🎨 **Streamlit Dashboard** | http://localhost:8501 | — |
 | 📖 **API Docs (Swagger)** | http://localhost:8000/docs | — |
 | 🧪 **MLflow Registry** | http://localhost:5000 | — |
-| 🌊 **Airflow DAGs** | http://localhost:8080 | admin / streamml123 |
-| 📊 **Grafana** | http://localhost:3001 | admin / streamml123 |
+| 🌊 **Airflow DAGs** | http://localhost:8080 | admin / inferstream123 |
+| 📊 **Grafana** | http://localhost:3001 | admin / inferstream123 |
 | 🔴 **RedisInsight** | http://localhost:8001 | — |
 | 🟠 **Kafka UI** | http://localhost:9080 | — |
 | 📈 **Prometheus** | http://localhost:9090 | — |
@@ -256,7 +256,7 @@ tests/test_api.py::TestHealthEndpoint::... PASSED  (12 tests)
 ## 📁 Repository Structure
 
 ```
-streamml/
+inferstream/
 ├── docker-compose.yml          ← Full stack: Kafka, Redis, MLflow, Airflow...
 ├── .env                        ← Environment configuration
 ├── producer/                   ← Synthetic stock tick generator (GBM model)
@@ -350,5 +350,5 @@ MIT License — free to use, modify, and distribute.
 ---
 
 <div align="center">
-<strong>⚡ StreamML v1.0 &nbsp;·&nbsp; Real-Time ML Feature Store & Model Serving Pipeline</strong>
+<strong>⚡ InferStream v1.0 &nbsp;·&nbsp; Real-Time ML Feature Store & Model Serving Pipeline</strong>
 </div>

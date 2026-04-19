@@ -1,5 +1,5 @@
 """
-StreamML — Centralized Configuration
+InferStream — Centralized Configuration
 All environment variables with typed defaults in one place.
 Works with plain os.getenv (no pydantic-settings required) so it runs in
 every service without additional dependencies.
@@ -21,13 +21,13 @@ class Settings:
     REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379")
 
     # ── DuckDB ───────────────────────────────────────────────────────────
-    # Docker: /data/streamml.duckdb  (mounted duckdb-data volume)
-    # Local:  ./data/streamml.duckdb
-    DUCKDB_PATH: str = os.getenv("DUCKDB_PATH", "/data/streamml.duckdb")
+    # Docker: /data/inferstream.duckdb  (mounted duckdb-data volume)
+    # Local:  ./data/inferstream.duckdb
+    DUCKDB_PATH: str = os.getenv("DUCKDB_PATH", "/data/inferstream.duckdb")
 
     # ── MLflow ───────────────────────────────────────────────────────────
     MLFLOW_TRACKING_URI: str    = os.getenv("MLFLOW_TRACKING_URI",    "http://localhost:5000")
-    MLFLOW_EXPERIMENT_NAME: str = os.getenv("MLFLOW_EXPERIMENT_NAME", "streamml-stock-prediction")
+    MLFLOW_EXPERIMENT_NAME: str = os.getenv("MLFLOW_EXPERIMENT_NAME", "inferstream-stock-prediction")
 
     # ── API ───────────────────────────────────────────────────────────────
     BENTOML_URL: str    = os.getenv("BENTOML_URL",    "http://bentoml:3000")
@@ -40,8 +40,8 @@ class Settings:
 
     # ── Monitoring ────────────────────────────────────────────────────────
     # Use env-configurable paths rather than hardcoded /tmp
-    DRIFT_REPORT_PATH: str      = os.getenv("DRIFT_REPORT_PATH",      "/tmp/streamml_drift_report.json")
-    DRIFT_HTML_REPORT_PATH: str = os.getenv("DRIFT_HTML_REPORT_PATH", "/tmp/streamml_drift_report.html")
+    DRIFT_REPORT_PATH: str      = os.getenv("DRIFT_REPORT_PATH",      "/tmp/inferstream_drift_report.json")
+    DRIFT_HTML_REPORT_PATH: str = os.getenv("DRIFT_HTML_REPORT_PATH", "/tmp/inferstream_drift_report.html")
 
 
 settings = Settings()

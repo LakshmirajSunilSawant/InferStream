@@ -1,5 +1,5 @@
 """
-StreamML — Binance WebSocket Live Data Producer
+InferStream — Binance WebSocket Live Data Producer
 Connects to Binance's free WebSocket API to stream real-time crypto trades
 (BTC, ETH, SOL) directly into Kafka.
 
@@ -38,7 +38,7 @@ RECONNECT_MAX_ATTEMPTS  = 0   # 0 = infinite (reconnect forever)
 
 @dataclass
 class StockTick:
-    """Standardized event matching the downstream StreamML schema."""
+    """Standardized event matching the downstream InferStream schema."""
     event_id:  str
     symbol:    str
     price:     float
