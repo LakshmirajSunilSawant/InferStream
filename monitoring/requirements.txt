@@ -1,0 +1,4 @@
+evidently==0.4.25
+duckdb==0.10.2
+pandas==2.2.1
+numpy==1.26.4

@@ -1,0 +1,15 @@
+.env.local
+.env
+mlflow_logs*.txt
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.coverage
+*.duckdb
+mlruns/
+/tmp/
+*.html
+*.parquet

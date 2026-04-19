@@ -1,0 +1,16 @@
+project: streamml
+
+provider:
+  registry:
+    type: local
+    path: /tmp/feast/registry
+
+online_store:
+  type: redis
+  connection_string: "redis://localhost:6379"
+
+offline_store:
+  type: duckdb
+  database: "/data/streamml.duckdb"
+
+entity_key_serialization_version: 2
