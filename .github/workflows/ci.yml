@@ -7,7 +7,10 @@ on:
     branches: [main]
 
 env:
-  PYTHON_VERSION: "3.11"
+  # 3.10, not 3.11: apache-flink 1.18.1 publishes wheels only up to cp310.
+  # On 3.11 pip falls back to the sdist, whose build deps pin numpy==1.21.4
+  # (which has no 3.11 build) and the install fails. Matches flink_jobs/Dockerfile.
+  PYTHON_VERSION: "3.10"
 
 jobs:
   # ─────────────────────────────────────
@@ -58,7 +61,7 @@ jobs:
 
     strategy:
       matrix:
-        service: [producer, flink_jobs, api, serving, dashboard]
+        service: [producer, flink_jobs, feature_store, api, serving, dashboard]
 
     steps:
       - uses: actions/checkout@v4

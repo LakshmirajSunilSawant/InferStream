@@ -127,8 +127,9 @@ class TestFeaturesEndpoint:
         assert "detail" in data
 
     def test_get_features_source_field(self, client):
+        """Reads now go through Feast first, with a raw-Redis fallback."""
         data = client.get("/features/ETHUSDT").json()
-        assert data.get("source") == "redis-online-store"
+        assert data.get("source") == "feast-online-store"
 
 
 # ── /predict ──────────────────────────────────────────────────────────────────
