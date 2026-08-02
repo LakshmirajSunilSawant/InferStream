@@ -245,8 +245,9 @@ services:
           cpus: "0.25"
 
   # ───────────────────────────────────────────────
-  # Feature Consumer (Kafka → Redis + DuckDB)
-  # FIX: DUCKDB_PATH now matches /data/inferstream.duckdb (same as API)
+  # Flink Feature Job (PyFlink embedded MiniCluster)
+  # Kafka raw-events → keyed stateful windows → Redis + DuckDB + Kafka features
+  # Runs a real Flink job in-process; JVM + PyFlink need extra memory.
   # ───────────────────────────────────────────────
   feature-consumer:
     build:
@@ -257,11 +258,45 @@ services:
     env_file: .env
     environment:
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KAFKA_TOPIC_RAW_EVENTS: raw-events
+      KAFKA_TOPIC_FEATURES: computed-features
       REDIS_URL: redis://redis:6379
-      DUCKDB_PATH: /data/inferstream.duckdb      # FIX: was /data/features.duckdb
+      DUCKDB_PATH: /data/inferstream.duckdb
       DUCKDB_BATCH_SIZE: "100"
       DUCKDB_FLUSH_INTERVAL: "10.0"
       FEATURE_COMPUTE_INTERVAL: "0.5"
+      FLINK_CHECKPOINT_DIR: file:///tmp/flink-checkpoints
+    volumes:
+      - duckdb-data:/data
+    depends_on:
+      kafka:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: on-failure
+    deploy:
+      resources:
+        limits:
+          memory: 1536m
+          cpus: "1.0"
+
+  # ───────────────────────────────────────────────
+  # Feast Push Service (Kafka computed-features → Feast online store)
+  # Canonical writer for the Feast-served online features; keeps the heavy
+  # Feast dependency out of the PyFlink/JVM container.
+  # ───────────────────────────────────────────────
+  feature-push:
+    build:
+      context: ./feature_store
+      dockerfile: Dockerfile
+    container_name: inferstream-feature-push
+    networks: [inferstream-net]
+    env_file: .env
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KAFKA_TOPIC_FEATURES: computed-features
+      FEAST_REPO_PATH: /app
+      FEAST_REGISTRY_DIR: /data/feast
     volumes:
       - duckdb-data:/data
     depends_on:
@@ -317,6 +352,7 @@ services:
       MLFLOW_TRACKING_URI: http://mlflow:5000
       DUCKDB_PATH: /data/inferstream.duckdb
       DRIFT_REPORT_PATH: /tmp/inferstream_drift_report.json
+      FEAST_REPO_PATH: /app/feature_store
     volumes:
       - duckdb-data:/data
       - ./feature_store:/app/feature_store

@@ -216,13 +216,37 @@ class PromoteRequest(BaseModel):
     stage: str = Field(..., example="production", description="Target stage: production, staging, archived")
 
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
+# ── Feature retrieval ─────────────────────────────────────────────────────────
+# Primary path is the Feast online store (same store the push service writes),
+# which keeps training/serving feature logic consistent. If Feast is unavailable
+# (registry not applied yet, import error, etc.) we fall back to the raw Redis
+# hash the Flink job also writes, so the API keeps serving.
+def _feast_online_features(symbol: str) -> dict[str, float]:
+    """Blocking Feast read — run in a thread from the async path."""
+    from feature_store import feast_client
+    return feast_client.get_online_features(symbol)
+
+
 async def get_features_from_redis(symbol: str, r: aioredis.Redis) -> dict[str, Any]:
+    """Raw-Redis fallback read (features:{symbol} hash written by the Flink job)."""
     key = f"features:{symbol.upper()}"
     raw = await r.hgetall(key)
     if not raw:
         return {col: 0.0 for col in FEATURE_COLS}
     return {col: float(raw.get(col, 0.0)) for col in FEATURE_COLS}
+
+
+async def get_features(symbol: str, r: aioredis.Redis) -> dict[str, Any]:
+    """Feast-first feature fetch with a raw-Redis fallback."""
+    try:
+        feats = await asyncio.to_thread(_feast_online_features, symbol)
+        # Feast returns all-zeros when the entity isn't in the online store yet;
+        # fall back to raw Redis so we don't serve empty features during warmup.
+        if any(v != 0.0 for v in feats.values()):
+            return feats
+    except Exception as e:
+        logger.debug(f"Feast online read failed for {symbol}, falling back to Redis: {e}")
+    return await get_features_from_redis(symbol, r)
 
 
 def enqueue_prediction_log(app: FastAPI, data: dict):
@@ -259,9 +283,9 @@ async def predict(request: Request, body: PredictRequest):
         resp.raise_for_status()
         result = resp.json()
     except Exception:
-        # Fallback: rule-based local prediction using Redis features
+        # Fallback: rule-based local prediction using online-store features
         r: aioredis.Redis = request.app.state.redis
-        features = await get_features_from_redis(symbol, r)
+        features = await get_features(symbol, r)
         result = _local_predict(symbol, features)
 
     latency_ms = (time.perf_counter() - t0) * 1000
@@ -296,7 +320,7 @@ def _local_predict(symbol: str, features: dict) -> dict:
 
 @app.get("/features/{symbol}", tags=["Features"])
 @limiter.limit("300/minute")
-async def get_features(request: Request, symbol: str):
+async def read_features(request: Request, symbol: str):
     """
     📊 **Live feature values** for a symbol from Redis (Feast online store).
 
@@ -310,7 +334,7 @@ async def get_features(request: Request, symbol: str):
         )
 
     r: aioredis.Redis = request.app.state.redis
-    features = await get_features_from_redis(upper, r)
+    features = await get_features(upper, r)
 
     # Update feature freshness metric
     computed_at_str = await r.hget(f"features:{upper}", "computed_at")
@@ -325,7 +349,7 @@ async def get_features(request: Request, symbol: str):
     return {
         "symbol": upper,
         **features,
-        "source": "redis-online-store",
+        "source": "feast-online-store",
     }
 
 
@@ -425,7 +449,8 @@ async def health(request: Request):
         health_status["status"] = "degraded"
 
     try:
-        r = await client.get(f"{BENTOML_URL}/health", timeout=3.0)
+        # BentoML 1.2 exposes /healthz; /health is not a GET route (returns 405)
+        r = await client.get(f"{BENTOML_URL}/healthz", timeout=3.0)
         health_status["bentoml"] = r.status_code == 200
     except Exception:
         health_status["bentoml"] = False

@@ -1,8 +1,9 @@
 """
 InferStream — Feast Feature Definitions
-Defines entities, feature views, and feature services for
-online (Redis) and offline (DuckDB) retrieval.
-Prevents training/serving skew by using the same feature logic everywhere.
+Defines the entity, push source, feature view, and feature service used for
+online (Redis) retrieval. The SAME definitions back both the streaming push
+(feature_store/push_service.py) and the online reads (api), so training and
+serving share one feature contract — no skew.
 """
 from datetime import timedelta
 
@@ -14,29 +15,33 @@ from feast import (
     PushSource,
     FeatureService,
 )
-from feast.types import Float64, Int64, String, UnixTimestamp
+from feast.types import Float64, Int64
 
 # ─── Entity ──────────────────────────────────────────────────────────────────
-stock_symbol = Entity(
+# join_keys is the modern Feast API (value_type is deprecated).
+symbol = Entity(
     name="symbol",
-    description="Stock ticker symbol (e.g. AAPL, NVDA)",
-    value_type=String,
+    join_keys=["symbol"],
+    description="Binance crypto trading pair (e.g. BTCUSDT, ETHUSDT, SOLUSDT)",
 )
 
 # ─── Data Sources ─────────────────────────────────────────────────────────────
-# Online push source (real-time from Flink → Redis)
+# Streaming push source: computed features arrive via store.push(...) from the
+# Feast push service (which consumes the Kafka `computed-features` topic that the
+# Flink job produces). The batch_source is the offline fallback for the same view.
 stock_push_source = PushSource(
     name="stock_push_source",
     batch_source=FileSource(
+        name="stock_features_batch",
         path="/data/features_offline.parquet",
         timestamp_field="computed_at",
     ),
 )
 
-# ─── Feature Views ────────────────────────────────────────────────────────────
+# ─── Feature View ─────────────────────────────────────────────────────────────
 stock_features_view = FeatureView(
     name="stock_realtime_features",
-    entities=[stock_symbol],
+    entities=[symbol],
     ttl=timedelta(minutes=5),
     schema=[
         Field(name="avg_price_5m",   dtype=Float64),
@@ -55,5 +60,5 @@ stock_features_view = FeatureView(
 prediction_feature_service = FeatureService(
     name="stock_prediction_features",
     features=[stock_features_view],
-    description="Features used for real-time stock direction prediction",
+    description="Features used for real-time crypto direction prediction",
 )

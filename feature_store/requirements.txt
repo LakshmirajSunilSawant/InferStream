@@ -1,0 +1,5 @@
+feast[duckdb]==0.40.1
+kafka-python==2.0.2
+redis[hiredis]==5.0.4
+duckdb==0.10.2
+pandas==2.2.1

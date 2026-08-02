@@ -1,16 +1,16 @@
 project: inferstream
 
-provider:
-  registry:
-    type: local
-    path: /tmp/feast/registry
+# Registry lives on the shared duckdb-data volume (mounted at /data) so the
+# push service and the API read the exact same feature definitions.
+registry: /data/feast/registry.db
+
+provider: local
 
 online_store:
   type: redis
-  connection_string: "redis://localhost:6379"
+  connection_string: "redis:6379"
 
 offline_store:
   type: duckdb
-  database: "/data/inferstream.duckdb"
 
 entity_key_serialization_version: 2
